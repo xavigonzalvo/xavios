@@ -2,14 +2,14 @@ GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-excep
 ASPARAMS = -f elf32
 LDPARAMS = -melf_i386
 
-hello.o: hello.s
+boot.o: boot.s
 	nasm $(ASPARAMS) -o $@ $<
 
 kernel.o: kernel.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
-mykernel.bin: linker.ld hello.o kernel.o
-	ld $(LDPARAMS) -T $< -o $@ hello.o kernel.o
+mykernel.bin: linker.ld boot.o kernel.o
+	ld $(LDPARAMS) -T $< -o $@ boot.o kernel.o
 
 mykernel.iso: mykernel.bin
 	mkdir iso
