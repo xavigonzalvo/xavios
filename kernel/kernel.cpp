@@ -1,4 +1,8 @@
-#include "types.h"
+// Main kernel entry.
+
+#include <types.h>
+
+int printk(const char * fmt, ...);
 
 void printf(char* str)
 {
@@ -7,8 +11,6 @@ void printf(char* str)
   for(int i = 0; str[i] != '\0'; ++i)
     VideoMemory[i] = (VideoMemory[i] & 0xFF00) | str[i];
 }
-
-
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -19,9 +21,8 @@ extern "C" void callConstructors()
     (*i)();
 }
 
-
-
-extern "C" void kernel_main(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
+extern "C" void kernel_main(const void* multiboot_structure,
+			    uint32_t /*multiboot_magic*/)
 {
   printf("Hello World!");
 

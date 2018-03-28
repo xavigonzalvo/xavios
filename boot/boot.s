@@ -21,8 +21,8 @@ stack_top:
 
 start:
 	mov esp, stack_top
-	extern kernel_main
-	call kernel_main
+	extern _kernel_main
+	call _kernel_main
 
 	cli
 

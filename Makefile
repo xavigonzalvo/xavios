@@ -1,15 +1,23 @@
-GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
+GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fleading-underscore -Iinclude/
 ASPARAMS = -f elf32
 LDPARAMS = -melf_i386
 
 boot/boot.o: boot/boot.s
 	nasm $(ASPARAMS) -o $@ $<
 
-kernel/kernel.o: kernel/kernel.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+boot/head.o: boot/head.s
+	as --32 -o $@ $<
 
-mykernel.bin: linker.ld boot/boot.o kernel/kernel.o
-	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/kernel.o
+kernel/mykernel.o:
+	(cd kernel; make)
+
+lib/lib.o:
+	(cd lib; make)
+
+LIBS = kernel/mykernel.o lib/lib.o
+
+mykernel.bin: linker.ld boot/boot.o boot/head.o $(LIBS)
+	ld $(LDPARAMS) -T $< -o $@ boot/boot.o boot/head.o $(LIBS)
 
 mykernel.iso: mykernel.bin
 	mkdir iso
@@ -27,4 +35,4 @@ mykernel.iso: mykernel.bin
 	rm -rf iso
 
 clean:
-	rm -rf boot/*.o kernel/*.o *.bin *.iso
+	rm -rf boot/*.o kernel/*.o lib/*.o *.bin *.iso
