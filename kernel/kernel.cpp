@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "sprintf.h"
+
 /* This tutorial will only work for the 32-bit ix86 targets. */
 #if !defined(__i386__)
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
@@ -117,5 +119,10 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t /*multiboo
 	terminal_initialize();
 
 	/* Newline support is left as an exercise. */
-  terminal_writestring("Hello\nWorld!");
+  terminal_writestring("Hello\nWorld!\n");
+  char buffer[100];
+  for (int i = 0; i < 100; i++) {
+    simple_sprintf(buffer, "%d\n", i);
+    terminal_writestring(buffer);
+  }
 }

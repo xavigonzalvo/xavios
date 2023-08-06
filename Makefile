@@ -1,5 +1,5 @@
 # GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
-GCCPARAMS = -m32 -fno-use-cxa-atexit -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
+GCCPARAMS = -m32 -fno-use-cxa-atexit -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fno-stack-protector
 ASPARAMS = -f elf32
 LDPARAMS = -melf_i386
 
@@ -9,8 +9,11 @@ boot/boot.o: boot/boot.s
 kernel/kernel.o: kernel/kernel.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
-mykernel.bin: linker.ld boot/boot.o kernel/kernel.o
-	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/kernel.o
+kernel/sprintf.o: kernel/sprintf.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
+mykernel.bin: linker.ld boot/boot.o kernel/sprintf.o kernel/kernel.o
+	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/sprintf.o kernel/kernel.o
 
 mykernel.iso: mykernel.bin
 	mkdir iso
