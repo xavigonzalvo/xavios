@@ -1,4 +1,5 @@
-#include "types.h"
+#include <cstdint>
+#include <stddef.h>
 
 void printf(const char* str)
 {
@@ -7,8 +8,6 @@ void printf(const char* str)
   for(int i = 0; str[i] != '\0'; ++i)
     VideoMemory[i] = (VideoMemory[i] & 0xFF00) | str[i];
 }
-
-
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;

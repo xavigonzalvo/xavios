@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
   grub-pc-bin \
   xorriso \
   nasm \
+  gcc-multilib \
+  g++-multilib \
   && rm -rf /var/lib/apt/lists/*
 
 # Set working directory in container
