@@ -74,6 +74,24 @@ void terminal_setcolor(uint8_t color)
 	terminal_color = color;
 }
 
+void terminal_scroll()
+{
+    for (size_t y = 0; y < VGA_HEIGHT - 1; y++)
+    {
+        for (size_t x = 0; x < VGA_WIDTH; x++)
+        {
+            const size_t top_index = y * VGA_WIDTH + x;
+            const size_t bottom_index = (y + 1) * VGA_WIDTH + x;
+            terminal_buffer[top_index] = terminal_buffer[bottom_index];
+        }
+    }
+    for (size_t x = 0; x < VGA_WIDTH; x++)
+    {
+        const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+        terminal_buffer[index] = vga_entry(' ', terminal_color);
+    }
+}
+
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 {
 	const size_t index = y * VGA_WIDTH + x;
@@ -87,7 +105,10 @@ void terminal_putchar(char c)
     // Move to the start of the next line
     terminal_column = 0;
     if (++terminal_row == VGA_HEIGHT)
-        terminal_row = 0;
+    {
+      terminal_scroll();
+      terminal_row = VGA_HEIGHT - 1; // Set the row to the last row
+    }
   }
   else
   {
@@ -97,7 +118,10 @@ void terminal_putchar(char c)
     {
       terminal_column = 0;
       if (++terminal_row == VGA_HEIGHT)
-        terminal_row = 0;
+      {
+        terminal_scroll();
+        terminal_row = VGA_HEIGHT - 1; // Set the row to the last row
+      }
     }
   }
 }
@@ -113,6 +137,18 @@ void terminal_writestring(const char* data)
 	terminal_write(data, strlen(data));
 }
 
+void delay(int cycles)
+{
+  for (int i = 0; i < cycles; i++)
+  {
+    // This inner loop is purely to waste cycles for delay.
+    for (volatile int j = 0; j < 10; j++)
+    {
+      // Do nothing, just waste some time.
+    }
+  }
+}
+
 extern "C" void kernel_main(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
 	/* Initialize terminal interface */
@@ -124,5 +160,6 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t /*multiboo
   for (int i = 0; i < 100; i++) {
     simple_sprintf(buffer, "%d\n", i);
     terminal_writestring(buffer);
+    delay(1000000);
   }
 }
