@@ -14,6 +14,16 @@ A toy example of some experiments to have an operating system.
 
     docker run --rm -v "$(pwd)":/kernel_source kernel-builder make mykernel.iso
 
+## Test the kernel
+
+As a BIN:
+
+    qemu-system-x86_64 -kernel mykernel.bin
+
+As an ISO:
+
+    qemu-system-x86_64 -cdrom mykernel.iso
+
 ## References:
 
 - [Bare bones](https://wiki.osdev.org/Bare_Bones)
