@@ -9,17 +9,35 @@ boot/boot.o: boot/boot.s
 kernel/kernel.o: kernel/kernel.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
+kernel/terminal.o: kernel/terminal.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
 kernel/sprintf.o: kernel/sprintf.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
-mykernel.bin: linker.ld boot/boot.o kernel/sprintf.o kernel/kernel.o
-	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/sprintf.o kernel/kernel.o
+kernel/printf.o: kernel/printf.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
+mykernel.bin: linker.ld boot/boot.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+
+intermediate.iso: mykernel.bin
+	# Create directory for kernel
+	mkdir -p intermediate/boot
+
+	# Copy the kernel binary
+	cp mykernel.bin intermediate/boot/mykernel.bin
+
+	# Create the ISO without GRUB
+	mkisofs -o intermediate.iso intermediate
+
+	# Cleanup the temporary directory
+	rm -rf intermediate
 
 mykernel.iso: mykernel.bin
-	mkdir iso
-	mkdir iso/boot
-	mkdir iso/boot/grub
+	mkdir -p iso/boot/grub
 	cp mykernel.bin iso/boot/mykernel.bin
+	# cp intermediate.iso iso/boot/intermediate.iso
 	echo 'set timeout=0'                      > iso/boot/grub/grub.cfg
 	echo 'set default=0'                     >> iso/boot/grub/grub.cfg
 	echo ''                                  >> iso/boot/grub/grub.cfg
@@ -31,4 +49,4 @@ mykernel.iso: mykernel.bin
 	rm -rf iso
 
 clean:
-	rm -rf boot/*.o kernel/*.o *.bin *.iso
+	rm -rf boot/*.o kernel/*.o iso/* *.bin *.iso
