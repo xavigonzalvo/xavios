@@ -18,8 +18,17 @@ kernel/sprintf.o: kernel/sprintf.cpp
 kernel/printf.o: kernel/printf.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
-mykernel.bin: linker.ld boot/boot.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
-	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+kernel/io.o: kernel/io.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
+kernel/atapi.o: kernel/atapi.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
+kernel/list_files.o: kernel/list_files.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
+mykernel.bin: linker.ld boot/boot.o kernel/io.o kernel/atapi.o kernel/list_files.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/io.o kernel/atapi.o kernel/list_files.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
 
 intermediate.iso: mykernel.bin
 	# Create directory for kernel

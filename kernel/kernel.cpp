@@ -7,29 +7,30 @@
 #include "terminal.h"
 #include "printf.h"
 #include "sprintf.h"
+#include "list_files.h"
 
 /* This tutorial will only work for the 32-bit ix86 targets. */
 #if !defined(__i386__)
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
 
-int strncmp(const char *str1, const char *str2, size_t n)
-{
-  while (n--)
-  {
-    if (*str1 != *str2)
-    {
-      return *(unsigned char *)str1 - *(unsigned char *)str2;
-    }
-    if (!*str1)
-    { // If end of string is reached
-      return 0;
-    }
-    str1++;
-    str2++;
-  }
-  return 0;
-}
+// int strncmp(const char *str1, const char *str2, size_t n)
+// {
+//   while (n--)
+//   {
+//     if (*str1 != *str2)
+//     {
+//       return *(unsigned char *)str1 - *(unsigned char *)str2;
+//     }
+//     if (!*str1)
+//     { // If end of string is reached
+//       return 0;
+//     }
+//     str1++;
+//     str2++;
+//   }
+//   return 0;
+// }
 
 void delay(int cycles)
 {
@@ -87,6 +88,11 @@ extern "C" void kernel_main(uint32_t multiboot_magic, const void *mbinfo)
     return;
   }
   simple_printf("Magic number is valid\n");
+
+  for (int i = 0; i < 10; ++i)
+  {
+    simple_printf("int: %d\n", i);
+  }
 
   // char buffer[100];
   // for (int i = 0; i < 100; i++)
