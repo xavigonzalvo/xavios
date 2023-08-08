@@ -106,7 +106,7 @@ extern "C"
       }
       sector++;
 
-      simple_sprintf(bb, "sector: %d (%s)\n", sector, potentialPVD->header.identifier);
+      // simple_sprintf(bb, "sector: %d (%s)\n", sector, potentialPVD->header.identifier);
       terminal_writestring(bb);
     }
 
@@ -129,18 +129,18 @@ extern "C"
 
     for (int i = 0; i < 10; i++)
     {
-      simple_sprintf(bb, "%d ", ((uint8_t *)buffer)[i]);
+      // simple_sprintf(bb, "%d ", ((uint8_t *)buffer)[i]);
     }
     terminal_writestring("\n");
 
-    simple_sprintf(bb, "%s %d %d\n",
-                   pvd->header.identifier,
-                   pvd->header.type, pvd->header.version);
+    // simple_sprintf(bb, "%s %d %d\n",
+    //                pvd->header.identifier,
+    //                pvd->header.type, pvd->header.version);
     terminal_writestring(bb);
 
     for (int i = 0; i < rootDirSectors; i++)
     {
-      simple_sprintf(bb, "%d\n", i);
+      // simple_sprintf(bb, "%d\n", i);
       terminal_writestring(bb);
 
       // if (!atapi_read_sector(rootRecord->extent_location[0] + i, buffer))

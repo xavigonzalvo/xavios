@@ -3,34 +3,17 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "terminal.h"
 #include "printf.h"
 #include "sprintf.h"
-#include "list_files.h"
+#include "ramdisk/file_ops.h"
 
 /* This tutorial will only work for the 32-bit ix86 targets. */
 #if !defined(__i386__)
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
-
-// int strncmp(const char *str1, const char *str2, size_t n)
-// {
-//   while (n--)
-//   {
-//     if (*str1 != *str2)
-//     {
-//       return *(unsigned char *)str1 - *(unsigned char *)str2;
-//     }
-//     if (!*str1)
-//     { // If end of string is reached
-//       return 0;
-//     }
-//     str1++;
-//     str2++;
-//   }
-//   return 0;
-// }
 
 void delay(int cycles)
 {
@@ -42,19 +25,6 @@ void delay(int cycles)
       // Do nothing, just waste some time.
     }
   }
-}
-
-void *memcpy(void *dest, const void *src, size_t n)
-{
-  unsigned char *d = (unsigned char *)dest;
-  const unsigned char *s = (const unsigned char *)src;
-
-  for (size_t i = 0; i < n; i++)
-  {
-    d[i] = s[i];
-  }
-
-  return dest;
 }
 
 char hexChars[] = "0123456789ABCDEF";
@@ -93,6 +63,32 @@ extern "C" void kernel_main(uint32_t multiboot_magic, const void *mbinfo)
   {
     simple_printf("int: %d\n", i);
   }
+
+  char buffer[100];
+  int value = 42;
+  const char *str = "world";
+
+  // Using simple_sprintf to print an integer and a string
+  simple_sprintf(buffer, sizeof(buffer), "Hello, %s! The answer is %d\n", str, value);
+
+  // Print the result
+  terminal_writestring(buffer); // Output: "Hello, world! The answer is 42"
+
+  create_file("test.txt", 100);
+  create_file("test2.txt", 100);
+  create_file("hola.txt", 1000);
+
+  file_write("test.txt", buffer, sizeof(buffer));
+
+  list_files();
+
+  // Read file.
+  simple_printf("\nReading file...\n");
+  char read_buffer[100];
+  file_read("test.txt", read_buffer, sizeof(read_buffer));
+  terminal_writestring(read_buffer);
+
+  // file system.
 
   // char buffer[100];
   // for (int i = 0; i < 100; i++)

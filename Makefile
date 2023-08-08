@@ -6,6 +6,12 @@ LDPARAMS = -melf_i386
 boot/boot.o: boot/boot.s
 	nasm $(ASPARAMS) -o $@ $<
 
+kernel/ramdisk/ops.o: kernel/ramdisk/ops.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
+kernel/string.o: kernel/string.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
+
 kernel/kernel.o: kernel/kernel.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
@@ -24,11 +30,11 @@ kernel/io.o: kernel/io.cpp
 kernel/atapi.o: kernel/atapi.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
 
-kernel/list_files.o: kernel/list_files.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+kernel/ramdisk/file_ops.o: kernel/ramdisk/file_ops.cpp
+	gcc $(GCCPARAMS) -c -o $@ $< -Ikernel
 
-mykernel.bin: linker.ld boot/boot.o kernel/io.o kernel/atapi.o kernel/list_files.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
-	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/io.o kernel/atapi.o kernel/list_files.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+mykernel.bin: linker.ld boot/boot.o kernel/string.o kernel/ramdisk/ops.o kernel/ramdisk/file_ops.o kernel/io.o kernel/atapi.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/string.o kernel/ramdisk/ops.o kernel/ramdisk/file_ops.o kernel/io.o kernel/atapi.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
 
 intermediate.iso: mykernel.bin
 	# Create directory for kernel
