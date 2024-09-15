@@ -1,0 +1,15 @@
+FROM arm64v8/ubuntu AS arm64
+
+RUN apt-get update && \
+  apt-get install -y \
+  make \
+  build-essential \
+  gcc-aarch64-linux-gnu \
+  binutils-aarch64-linux-gnu \
+  mkisofs;
+
+# Set working directory in container
+WORKDIR /kernel_source
+
+# Copy the kernel source into the container
+COPY . /kernel_source/

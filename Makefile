@@ -1,40 +1,47 @@
-# GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
-GCCPARAMS = -m32 -fno-use-cxa-atexit -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fno-stack-protector
-ASPARAMS = -f elf32
-LDPARAMS = -melf_i386
+ARCH ?= arm64
 
-boot/boot.o: boot/boot.s
-	nasm $(ASPARAMS) -o $@ $<
+# For 64-bit ARM
+CC_arm64 = aarch64-linux-gnu-gcc
+LD_arm64 = aarch64-linux-gnu-ld
+AS_arm64 = aarch64-linux-gnu-as
+OBJCOPY_arm64 = aarch64-linux-gnu-objcopy
+CFLAGS_arm64 = -ffreestanding \
+               -nostdlib \
+               -nostartfiles \
+               -mcpu=cortex-a53 \
+               -march=armv8-a \
+               -Wall \
+               -Wextra \
+               -O2 \
+               -I.
+ASFLAGS_arm64 = -mcpu=cortex-a53 \
+                -march=armv8-a
+LDFLAGS_arm64 = -T linker_$(ARCH).ld \
+                -nostdlib \
+                -static
 
-kernel/ramdisk/ops.o: kernel/ramdisk/ops.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+# Assign variables based on the architecture selected
+CC = $(CC_$(ARCH))
+LD = $(LD_$(ARCH))
+AS = $(AS_$(ARCH))
+OBJCOPY = $(OBJCOPY_$(ARCH))
+CFLAGS = $(CFLAGS_$(ARCH))
+ASFLAGS = $(ASFLAGS_$(ARCH))
+LDFLAGS = $(LDFLAGS_$(ARCH))
 
-kernel/string.o: kernel/string.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+boot.o: boot_$(ARCH)/boot.s
+	$(AS) $(ASFLAGS) boot_$(ARCH)/boot.s -o boot.o
 
-kernel/kernel.o: kernel/kernel.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+kernel.o: kernel_$(ARCH)/kernel.c
+	$(CC) $(CFLAGS) -c kernel_$(ARCH)/kernel.c -o kernel.o
 
-kernel/terminal.o: kernel/terminal.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+kernel.elf: boot.o kernel.o
+	$(LD) $(LDFLAGS) boot.o kernel.o -o kernel.elf
 
-kernel/sprintf.o: kernel/sprintf.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+kernel.bin: kernel.elf
+	$(OBJCOPY) -O binary kernel.elf kernel.bin
 
-kernel/printf.o: kernel/printf.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
-
-kernel/io.o: kernel/io.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
-
-kernel/atapi.o: kernel/atapi.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
-
-kernel/ramdisk/file_ops.o: kernel/ramdisk/file_ops.cpp
-	gcc $(GCCPARAMS) -c -o $@ $< -Ikernel
-
-mykernel.bin: linker.ld boot/boot.o kernel/string.o kernel/ramdisk/ops.o kernel/ramdisk/file_ops.o kernel/io.o kernel/atapi.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
-	ld $(LDPARAMS) -T $< -o $@ boot/boot.o kernel/string.o kernel/ramdisk/ops.o kernel/ramdisk/file_ops.o kernel/io.o kernel/atapi.o kernel/terminal.o kernel/printf.o kernel/sprintf.o kernel/kernel.o
+# This is WIP.
 
 intermediate.iso: mykernel.bin
 	# Create directory for kernel
@@ -63,5 +70,13 @@ mykernel.iso: mykernel.bin
 	grub-mkrescue --output=mykernel.iso iso
 	rm -rf iso
 
+# Show build information
+info:
+  @echo "Building for architecture: $(ARCH)"
+  @echo "Using compiler: $(CC)"
+  @echo "Using assembler: $(AS)"
+  @echo "Using linker: $(LD)"
+  @echo "Using flags: $(CFLAGS)"
+
 clean:
-	rm -rf boot/*.o kernel/*.o iso/* *.bin *.iso
+	rm -rf boot_$(ARCH)/*.o kernel_$(ARCH)/*.o iso/* *.bin *.iso *.elf *.o *.out
