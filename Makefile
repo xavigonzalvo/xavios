@@ -20,6 +20,9 @@ LDFLAGS_arm64 = -T linker_$(ARCH).ld \
                 -nostdlib \
                 -static
 
+# For 64-bit x86.
+# TODO.
+
 # Assign variables based on the architecture selected
 CC = $(CC_$(ARCH))
 LD = $(LD_$(ARCH))
