@@ -4,26 +4,33 @@ SECTIONS
 {
     . = 0x40000000;
 
-    .text : {
-        *(.text.boot)
+    .text : ALIGN(8) {
+        KEEP(*(.text.boot))  /* Ensure the boot code is not discarded */
         *(.text)
     }
 
-    .rodata : {
+    .rodata : ALIGN(8) {
         *(.rodata)
     }
 
-    .data : {
+    .data : ALIGN(8) {
         *(.data)
     }
 
-    .bss : {
+    .bss : ALIGN(8) {
         bss_begin = .;
         *(.bss)
         bss_end = .;
     }
 
-    . = ALIGN(8);
+    . = ALIGN(16);
     . = . + 0x1000;
     stack_top = .;
+
+    /DISCARD/ : {
+        *(.comment)
+        *(.gnu*)
+        *(.note*)
+        *(.eh_frame*)
+    }
 }

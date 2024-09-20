@@ -35,11 +35,17 @@ LDFLAGS = $(LDFLAGS_$(ARCH))
 boot.o: boot_$(ARCH)/boot.s
 	$(AS) $(ASFLAGS) boot_$(ARCH)/boot.s -o boot.o
 
+uart.o: kernel_$(ARCH)/uart.c
+	$(CC) $(CFLAGS) -c kernel_$(ARCH)/uart.c -o uart.o
+
+# custom_printf.o: kernel_$(ARCH)/custom_printf.c
+# 	$(CC) $(CFLAGS) -c kernel_$(ARCH)/custom_printf.c -o custom_printf.o
+
 kernel.o: kernel_$(ARCH)/kernel.c
 	$(CC) $(CFLAGS) -c kernel_$(ARCH)/kernel.c -o kernel.o
 
-kernel.elf: boot.o kernel.o
-	$(LD) $(LDFLAGS) boot.o kernel.o -o kernel.elf
+kernel.elf: boot.o uart.o kernel.o
+	$(LD) $(LDFLAGS) boot.o uart.o kernel.o -o kernel.elf
 
 kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
