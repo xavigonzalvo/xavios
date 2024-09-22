@@ -38,14 +38,14 @@ boot.o: boot_$(ARCH)/boot.s
 uart.o: kernel_$(ARCH)/uart.c
 	$(CC) $(CFLAGS) -c kernel_$(ARCH)/uart.c -o uart.o
 
-# custom_printf.o: kernel_$(ARCH)/custom_printf.c
-# 	$(CC) $(CFLAGS) -c kernel_$(ARCH)/custom_printf.c -o custom_printf.o
+printk.o: kernel_$(ARCH)/printk.c
+	$(CC) $(CFLAGS) -c kernel_$(ARCH)/printk.c -o printk.o
 
 kernel.o: kernel_$(ARCH)/kernel.c
 	$(CC) $(CFLAGS) -c kernel_$(ARCH)/kernel.c -o kernel.o
 
-kernel.elf: boot.o uart.o kernel.o
-	$(LD) $(LDFLAGS) boot.o uart.o kernel.o -o kernel.elf
+kernel.elf: boot.o uart.o printk.o kernel.o
+	$(LD) $(LDFLAGS) boot.o uart.o printk.o kernel.o -o kernel.elf
 
 kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary kernel.elf kernel.bin

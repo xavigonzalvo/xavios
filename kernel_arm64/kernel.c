@@ -1,4 +1,5 @@
 #include "kernel_arm64/uart.h"
+#include "kernel_arm64/printk.h"
 
 extern void kernel_main(void);
 
@@ -25,8 +26,7 @@ void kernel_main()
 {
   // debug_print("Debug: Entered kernel_main\n");
   uart_init();
-  uart_puts("Init!\n");
-  uart_puts("Hello from AArch64 kernel!\n");
+  printk("Initializing UART [{{g}}OK{{0}}]\n");
   uart_puts("Press 'q' to exit.\n");
 
   while (1)
@@ -46,5 +46,3 @@ void kernel_main()
     }
   }
 }
-
-void bb() {}
