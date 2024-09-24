@@ -1,5 +1,5 @@
-#ifndef __KERNEL_ARM64_UART_H__
-#define __KERNEL_ARM64_UART_H__
+#ifndef __UART_H__
+#define __UART_H__
 
 // Function to write to a memory-mapped register
 static inline void mmio_write(unsigned long reg, unsigned int val)

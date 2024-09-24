@@ -1,4 +1,4 @@
-#include "kernel_arm64/uart.h"
+#include "uart.h"
 
 // QEMU virt machine UART0 base address
 #define UART0_BASE 0x09000000

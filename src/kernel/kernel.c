@@ -1,17 +1,17 @@
-#include "kernel_arm64/uart.h"
-#include "kernel_arm64/printk.h"
+#include "uart.h"
+#include "printk.h"
 
 extern void kernel_main(void);
 
-// Add this function for debugging
-// __attribute__((used)) void debug_print(const char *message)
-// {
-//   uart_init();
-//   uart_puts(message);
-//   while (1)
-//   {
-//   }
-// }
+// Debugging function.
+__attribute__((used)) void debug_print(const char *message)
+{
+  uart_init();
+  uart_puts(message);
+  while (1)
+  {
+  }
+}
 
 // QEMU debug exit device
 #define QEMU_DEBUG_EXIT_ADDR 0x09000000

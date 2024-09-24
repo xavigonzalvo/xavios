@@ -1,4 +1,4 @@
-#include "kernel_arm64/uart.h"
+#include "uart.h"
 
 // Color codes
 #define COLOR_RESET "\033[0m"

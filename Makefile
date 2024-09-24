@@ -1,54 +1,46 @@
+include config.mk
+
 ARCH ?= arm64
 
-# For 64-bit ARM
-CC_arm64 = aarch64-linux-gnu-gcc
-LD_arm64 = aarch64-linux-gnu-ld
-AS_arm64 = aarch64-linux-gnu-as
-OBJCOPY_arm64 = aarch64-linux-gnu-objcopy
-CFLAGS_arm64 = -ffreestanding \
-               -nostdlib \
-               -nostartfiles \
-               -mcpu=cortex-a53 \
-               -march=armv8-a \
-               -Wall \
-               -Wextra \
-               -O2 \
-               -I.
-ASFLAGS_arm64 = -mcpu=cortex-a53 \
-                -march=armv8-a
-LDFLAGS_arm64 = -T linker_$(ARCH).ld \
-                -nostdlib \
-                -static
+-include src/arch/$(ARCH)/config.mk
 
-# For 64-bit x86.
-# TODO.
+CFLAGS += -Isrc/include -Isrc/arch/$(ARCH)
 
-# Assign variables based on the architecture selected
-CC = $(CC_$(ARCH))
-LD = $(LD_$(ARCH))
-AS = $(AS_$(ARCH))
-OBJCOPY = $(OBJCOPY_$(ARCH))
-CFLAGS = $(CFLAGS_$(ARCH))
-ASFLAGS = $(ASFLAGS_$(ARCH))
-LDFLAGS = $(LDFLAGS_$(ARCH))
+# Paths
+SRC_KERNEL := src/kernel
+SRC_ARCH := src/arch/$(ARCH)
+KERNEL_SRCS := $(wildcard $(SRC_KERNEL)/*.c)
+ARCH_SRCS := $(wildcard $(SRC_ARCH)/*.c)
 
-boot.o: boot_$(ARCH)/boot.s
-	$(AS) $(ASFLAGS) boot_$(ARCH)/boot.s -o boot.o
+KERNEL_OBJS := $(patsubst $(SRC_KERNEL)/%.c, $(SRC_KERNEL)/%.o, $(wildcard $(SRC_KERNEL)/*.c))
+ARCH_OBJS := $(patsubst $(SRC_ARCH)/%.c, $(SRC_ARCH)/%.o, $(wildcard $(SRC_ARCH)/*.c))
 
-uart.o: kernel_$(ARCH)/uart.c
-	$(CC) $(CFLAGS) -c kernel_$(ARCH)/uart.c -o uart.o
+OBJS := $(KERNEL_OBJS) $(ARCH_OBJS) src/arch/$(ARCH)/boot.o
 
-printk.o: kernel_$(ARCH)/printk.c
-	$(CC) $(CFLAGS) -c kernel_$(ARCH)/printk.c -o printk.o
+# For each .c file, generate a .d file to track dependencies
+DEPFILES := $(KERNEL_SRCS:.c=.d) $(ARCH_SRCS:.c=.d)
 
-kernel.o: kernel_$(ARCH)/kernel.c
-	$(CC) $(CFLAGS) -c kernel_$(ARCH)/kernel.c -o kernel.o
+all: kernel.bin
 
-kernel.elf: boot.o uart.o printk.o kernel.o
-	$(LD) $(LDFLAGS) boot.o uart.o printk.o kernel.o -o kernel.elf
+src/arch/$(ARCH)/boot.o: src/arch/$(ARCH)/boot.s
+	$(AS) $(ASFLAGS) -o $@ $<
+
+# Manually track the linking order for specific files
+OBJS_ORDERED := src/arch/$(ARCH)/boot.o src/arch/$(ARCH)/uart.o src/kernel/printk.o src/kernel/kernel.o
+
+# Final linking step
+kernel.elf: $(OBJS_ORDERED) $(filter-out $(OBJS_ORDERED), $(OBJS))
+	$(LD) $(LDFLAGS) -o $@ $^
 
 kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary kernel.elf kernel.bin
+
+# Rule to compile .c to .o and generate .d dependency files
+%.o: %.c
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# Include dependency files (if they exist)
+-include $(DEPFILES)
 
 # This is WIP.
 
@@ -79,13 +71,5 @@ mykernel.iso: mykernel.bin
 	grub-mkrescue --output=mykernel.iso iso
 	rm -rf iso
 
-# Show build information
-info:
-  @echo "Building for architecture: $(ARCH)"
-  @echo "Using compiler: $(CC)"
-  @echo "Using assembler: $(AS)"
-  @echo "Using linker: $(LD)"
-  @echo "Using flags: $(CFLAGS)"
-
 clean:
-	rm -rf boot_$(ARCH)/*.o kernel_$(ARCH)/*.o iso/* *.bin *.iso *.elf *.o *.out
+	rm -f $(OBJS) src/arch/$(ARCH)/boot.o kernel.elf kernel.bin
