@@ -6,6 +6,15 @@ ARCH ?= arm64
 
 CFLAGS += -Isrc/include -Isrc/arch/$(ARCH)
 
+# Add architecture-specific defines
+ifeq ($(ARCH),arm64)
+    CFLAGS += -D__aarch64__
+else ifeq ($(ARCH),x86_64)
+    CFLAGS += -D__x86_64__
+else
+    $(error Unsupported architecture: $(ARCH))
+endif
+
 # Paths
 SRC_KERNEL := src/kernel
 SRC_ARCH := src/arch/$(ARCH)
@@ -24,6 +33,9 @@ all: kernel.bin
 
 src/arch/$(ARCH)/boot.o: src/arch/$(ARCH)/boot.s
 	$(AS) $(ASFLAGS) -o $@ $<
+
+# src/arch/$(ARCH)/exception_vectors.o: src/arch/$(ARCH)/exception_vectors.s
+# 	$(AS) $(ASFLAGS) -o $@ $<
 
 # Manually track the linking order for specific files
 OBJS_ORDERED := src/arch/$(ARCH)/boot.o src/arch/$(ARCH)/uart.o src/kernel/printk.o src/kernel/kernel.o
@@ -72,4 +84,4 @@ mykernel.iso: mykernel.bin
 	rm -rf iso
 
 clean:
-	rm -f $(OBJS) src/arch/$(ARCH)/boot.o kernel.elf kernel.bin
+	rm -f $(OBJS) $(DEPFILES) src/arch/$(ARCH)/*.o kernel.elf kernel.bin src/kernel/*.o src/kernel/*.d

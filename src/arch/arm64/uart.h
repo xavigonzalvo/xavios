@@ -28,4 +28,6 @@ int uart_getc_ready();
 // Function to read a character from UART
 char uart_getc();
 
+void uart_print_hex(unsigned long value);
+
 #endif

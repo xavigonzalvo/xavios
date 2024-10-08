@@ -98,6 +98,9 @@ void handle_color(char color)
 // Custom printf function with color support
 void printk(const char *format, ...)
 {
+  uart_puts(format);
+  return;
+
   __builtin_va_list args;
   __builtin_va_start(args, format);
 

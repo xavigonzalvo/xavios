@@ -62,3 +62,31 @@ char uart_getc()
   // Read the character from the UART data register
   return mmio_read(UART_DR) & 0xFF;
 }
+
+void uart_print_hex(unsigned long value)
+{
+  const char hex_chars[] = "0123456789ABCDEF";
+  char buffer[sizeof(unsigned long) * 2 + 3]; // '0x' prefix + 16 hex digits + null terminator
+  int index = sizeof(buffer) - 1;
+
+  // Null-terminate the string
+  buffer[index] = '\0';
+
+  // Convert to hex, starting from the least significant digit
+  do
+  {
+    index--;
+    buffer[index] = hex_chars[value & 0xF];
+    value >>= 4;
+  } while (value != 0 && index > 2);
+
+  // Add '0x' prefix
+  buffer[--index] = 'x';
+  buffer[--index] = '0';
+
+  // Print the hex string
+  for (const char *p = &buffer[index]; *p; p++)
+  {
+    uart_putc(*p);
+  }
+}
