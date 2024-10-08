@@ -37,12 +37,10 @@ void print_stack_pointer()
   uart_puts("\n");
 }
 
-extern void init_mmu(void);
-
 void kernel_main()
 {
-  uart_init();
   uart_puts("Kernel started\n");
+  print_stack_pointer();
   uart_puts("Vector table initialized\n");
   uart_puts("MMU initialized\n");
 

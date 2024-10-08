@@ -5,6 +5,9 @@ _start:
     // Initialize stack pointer
     ldr x0, =stack_top
     mov sp, x0
+
+    // Initialize UART for logging
+    bl uart_init
     bl kernel_main
 hang:
     b hang
