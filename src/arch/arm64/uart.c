@@ -90,3 +90,17 @@ void uart_print_hex(unsigned long value)
     uart_putc(*p);
   }
 }
+
+void log_el(unsigned int el)
+{
+  uart_puts("Current Exception Level (EL): ");
+
+  // Convert EL number to a character
+  char el_str[2];
+  el_str[0] = '0' + el; // Convert integer to character
+  el_str[1] = '\0';
+
+  // Log the EL mode
+  uart_puts(el_str);
+  uart_puts("\n");
+}
