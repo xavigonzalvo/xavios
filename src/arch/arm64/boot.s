@@ -3,6 +3,24 @@
 .align 4  // 16-byte alignment for .text section (instructions)
 
 _start:
+    // Initialize stack pointer
+    ldr x0, =stack_top
+    mov sp, x0
+
+    /* Clear BSS */
+    ldr x1, =bss_begin
+    ldr x2, =bss_end
+zero_bss:
+    cmp x1, x2
+    b.ge bss_cleared
+    str xzr, [x1], #8
+    b zero_bss
+
+bss_cleared:
+    // Initialize UART for logging
+    bl uart_init
+
+    // Check the current Exception Level (EL)
     mrs x0, CurrentEL          /* Read the Current Exception Level */
     lsr x0, x0, #2             /* Extract the EL bits (bits [3:2]) */
     bl log_el
@@ -26,22 +44,6 @@ switch_to_el1:
     eret                       /* Return to EL1 */
 
 el1_main:
-    // Initialize stack pointer
-    ldr x0, =stack_top
-    mov sp, x0
-
-    /* Clear BSS */
-    ldr x1, =bss_begin
-    ldr x2, =bss_end
-zero_bss:
-    cmp x1, x2
-    b.ge bss_cleared
-    str xzr, [x1], #8
-    b zero_bss
-
-bss_cleared:
-    // Initialize UART for logging
-    bl uart_init
     bl kernel_main
 hang:
     b hang
